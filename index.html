@@ -38,10 +38,9 @@ body {
 
 .text p {
   font-size: clamp(18px, 5vw, 24px);
-  line-height: 1.5;
 }
 
-/* Name container */
+/* Name */
 .name {
   font-size: clamp(40px, 10vw, 60px);
   color: gold;
@@ -76,16 +75,23 @@ body {
   opacity: 0;
   transition: opacity 0.3s;
 }
+
+/* Canvas */
+canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
 </style>
 </head>
 
 <body>
 
 <div id="flash" class="flash"></div>
+<canvas id="canvas"></canvas>
 
 <div class="container">
 
-  <!-- Script -->
   <div id="s1" class="text show">
     <p>In a world that never pauses…<br>something extraordinary did.</p>
   </div>
@@ -106,7 +112,6 @@ body {
     <p>✨ Presenting…</p>
   </div>
 
-  <!-- Name -->
   <div id="s6" class="text name"></div>
 
 </div>
@@ -121,12 +126,10 @@ function nextScene() {
 
   if (i < scenes.length) {
     document.getElementById(scenes[i]).classList.add("show");
-
-    let delay = (i === 4) ? 2000 : 1600;
+    let delay = (i === 4) ? 2200 : 1600;
     setTimeout(nextScene, delay);
   } else {
-    // Suspense pause before name
-    setTimeout(reveal, 1800);
+    setTimeout(reveal, 1800); // suspense pause
   }
 }
 
@@ -140,7 +143,54 @@ function reveal() {
   }, 300);
 }
 
-// Letter-by-letter reveal
+// Canvas setup
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+function resize(){
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener("resize", resize);
+
+let particles = [];
+
+// Celebration burst
+function burst(x, y) {
+  for (let i = 0; i < 20; i++) {
+    particles.push({
+      x,
+      y,
+      vx: (Math.random() - 0.5) * 6,
+      vy: (Math.random() - 0.5) * 6,
+      life: 60
+    });
+  }
+}
+
+// Animate particles
+function animateParticles() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  particles.forEach((p, index) => {
+    p.x += p.vx;
+    p.y += p.vy;
+    p.life--;
+
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+    ctx.fillStyle = "gold";
+    ctx.fill();
+
+    if (p.life <= 0) particles.splice(index, 1);
+  });
+
+  requestAnimationFrame(animateParticles);
+}
+animateParticles();
+
+// Letter reveal with celebration
 function showNameLetters() {
   const name = "GATIK";
   const container = document.getElementById("s6");
@@ -155,7 +205,12 @@ function showNameLetters() {
 
     setTimeout(() => {
       span.classList.add("show");
-    }, index * 400); // timing between letters
+
+      // Celebration burst at letter position
+      const rect = span.getBoundingClientRect();
+      burst(rect.left + rect.width / 2, rect.top + rect.height / 2);
+
+    }, index * 700); // slower = more dramatic
   });
 }
 
