@@ -3,191 +3,196 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Arrival</title>
+<title>Baby Reveal</title>
 
 <style>
 body {
   margin: 0;
-  background: black;
-  color: white;
-  font-family: 'Segoe UI', sans-serif;
+  background: radial-gradient(circle at center, #0b0b0f, #000);
   overflow: hidden;
+  font-family: 'Arial Black', sans-serif;
+  color: white;
 }
 
-/* Scene system */
-.scene {
+/* Center container */
+.container {
   position: absolute;
   width: 100%;
   height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  text-align: center;
-  opacity: 0;
-  transform: scale(1.05);
-  transition: opacity 2s ease, transform 2s ease;
 }
 
-.scene.active {
+/* Cinematic text */
+.text {
+  position: absolute;
+  opacity: 0;
+  transform: scale(0.9);
+  transition: all 1.5s ease;
+  text-align: center;
+  letter-spacing: 3px;
+}
+
+.show {
   opacity: 1;
   transform: scale(1);
 }
 
-/* Text */
-.text {
-  font-size: 26px;
-  letter-spacing: 2px;
-  max-width: 80%;
-  line-height: 1.5;
-}
-
-/* Fade in slow */
-.fade {
-  animation: fadeIn 3s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-/* Suspense pulse */
-.pulse {
-  animation: pulse 1.5s infinite;
-}
-@keyframes pulse {
-  0%,100% { opacity: 1; }
-  50% { opacity: 0.3; }
-}
-
-/* Flash */
-.flash {
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  background: white;
-  opacity: 0;
-  pointer-events: none;
-}
-
-/* Cinematic bars */
-.bar {
-  position: fixed;
-  width: 100%;
-  height: 10%;
-  background: black;
-  z-index: 10;
-}
-.top { top: 0; }
-.bottom { bottom: 0; }
-
-/* Title reveal */
+/* Netflix style title */
 .title {
-  font-size: 50px;
-  letter-spacing: 15px;
-  color: gold;
-  text-shadow: 0 0 20px gold;
-  opacity: 0;
-  transform: scale(0.7);
-  transition: all 1.5s ease;
+  font-size: 2rem;
+  text-transform: uppercase;
+  color: #ccc;
 }
 
-/* Mobile */
-@media(max-width:600px){
-  .text { font-size: 20px; }
-  .title { font-size: 34px; }
+/* Name reveal 3D */
+.name {
+  font-size: 3rem;
+  color: gold;
+  letter-spacing: 8px;
+  text-shadow:
+    0 2px 0 #b89600,
+    0 4px 0 #a38300,
+    0 8px 15px rgba(255,215,0,0.5),
+    0 0 40px gold;
+  transform: perspective(800px) rotateX(10deg);
+}
+
+/* Shockwave */
+.shockwave {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 2px solid gold;
+  opacity: 0;
+}
+
+@keyframes shock {
+  0% {
+    transform: scale(0.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(8);
+    opacity: 0;
+  }
+}
+
+/* Glow pulse */
+@keyframes glowPulse {
+  0% { text-shadow: 0 0 10px gold; }
+  50% { text-shadow: 0 0 40px gold; }
+  100% { text-shadow: 0 0 10px gold; }
+}
+
+.glow {
+  animation: glowPulse 2s infinite;
+}
+
+/* Canvas */
+canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 </style>
 </head>
 
 <body>
 
-<div class="bar top"></div>
-<div class="bar bottom"></div>
-<div class="flash" id="flash"></div>
+<canvas id="particles"></canvas>
 
-<!-- Scene 1 -->
-<div class="scene active" id="s1">
-  <div class="text fade">In the quiet moments of life...</div>
-</div>
+<div class="container">
 
-<!-- Scene 2 -->
-<div class="scene" id="s2">
-  <div class="text fade">Two hearts dreamed of something more...</div>
-</div>
+  <div id="s1" class="text title">A new soul arrives...</div>
+  <div id="s2" class="text title">A new journey begins...</div>
+  <div id="s3" class="text title">Our hearts are full...</div>
 
-<!-- Scene 3 -->
-<div class="scene" id="s3">
-  <div class="text fade">A journey filled with hope...</div>
-</div>
+  <div id="s4" class="text title glow">It's a Boy</div>
 
-<!-- Scene 4 -->
-<div class="scene" id="s4">
-  <div class="text fade">And endless love...</div>
-</div>
+  <div id="s5" class="text title">Presenting...</div>
 
-<!-- Scene 5 (Suspense) -->
-<div class="scene" id="s5">
-  <div class="text pulse">And then...</div>
-</div>
+  <div id="s6" class="text">
+    <div class="name">GATIK</div>
+  </div>
 
-<!-- Scene 6 (Pause - nothing happens intentionally) -->
-<div class="scene" id="s6"></div>
+  <div id="shock" class="shockwave"></div>
 
-<!-- Scene 7 (Reveal) -->
-<div class="scene" id="s7">
-  <div id="name" class="title"></div>
 </div>
 
 <script>
-const scenes = ["s1","s2","s3","s4","s5","s6","s7"];
-const timings = [3000,3000,3000,3000,2000,1500];
+// SCENE FLOW
+const scenes = ["s1","s2","s3","s4","s5","s6"];
+let i = 0;
 
-function show(id){
-  document.querySelectorAll(".scene").forEach(s=>s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
+function nextScene() {
+  if (i > 0) {
+    document.getElementById(scenes[i - 1]).classList.remove("show");
+  }
+
+  if (i < scenes.length) {
+    document.getElementById(scenes[i]).classList.add("show");
+
+    // Trigger shockwave on final reveal
+    if (i === 5) triggerShockwave();
+
+    i++;
+    setTimeout(nextScene, i === 5 ? 2500 : 1800);
+  }
 }
 
-/* Timeline */
-function play(){
-  let t = 0;
+setTimeout(nextScene, 1000);
 
-  timings.forEach((d,i)=>{
-    setTimeout(()=>show(scenes[i]), t);
-    t += d;
+
+// SHOCKWAVE
+function triggerShockwave() {
+  const shock = document.getElementById("shock");
+  shock.style.left = "50%";
+  shock.style.top = "50%";
+  shock.style.transform = "translate(-50%, -50%)";
+  shock.style.animation = "shock 1.5s ease-out";
+}
+
+
+// GOLDEN PARTICLES
+const canvas = document.getElementById("particles");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let particles = [];
+
+for (let i = 0; i < 120; i++) {
+  particles.push({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    size: Math.random() * 2,
+    speedX: (Math.random() - 0.5),
+    speedY: (Math.random() - 0.5)
+  });
+}
+
+function animate() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  particles.forEach(p => {
+    p.x += p.speedX;
+    p.y += p.speedY;
+
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fillStyle = "gold";
+    ctx.fill();
   });
 
-  // suspense pause already handled by empty scene
-
-  setTimeout(()=>{
-    impactReveal();
-  }, t);
+  requestAnimationFrame(animate);
 }
 
-/* Impact reveal */
-function impactReveal(){
-  const flash = document.getElementById("flash");
-  const name = document.getElementById("name");
+animate();
 
-  // flash hit
-  flash.style.opacity = 1;
-  setTimeout(()=>flash.style.opacity = 0, 150);
-
-  // slight zoom shake
-  document.body.style.transform = "scale(1.03)";
-  setTimeout(()=>document.body.style.transform = "scale(1)", 200);
-
-  // show name
-  setTimeout(()=>{
-    show("s7");
-    name.innerHTML = "GATIK";
-    name.style.opacity = 1;
-    name.style.transform = "scale(1)";
-  }, 200);
-}
-
-// start
-play();
 </script>
 
 </body>
