@@ -14,7 +14,7 @@ body {
   overflow: hidden;
 }
 
-/* Scene container */
+/* Scene system */
 .scene {
   position: absolute;
   width: 100%;
@@ -25,73 +25,91 @@ body {
   flex-direction: column;
   text-align: center;
   opacity: 0;
-  transition: opacity 1.5s ease;
+  transform: scale(1.05);
+  transition: opacity 1.5s ease, transform 2s ease;
 }
 
 .scene.active {
   opacity: 1;
+  transform: scale(1);
 }
 
-/* Stars background */
-.stars {
+/* Floating particles */
+.particles span {
   position: absolute;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(white 1px, transparent 1px);
-  background-size: 3px 3px;
-  opacity: 0.15;
-  animation: moveStars 80s linear infinite;
+  width: 2px;
+  height: 2px;
+  background: white;
+  opacity: 0.4;
+  animation: floatUp linear infinite;
 }
 
-@keyframes moveStars {
-  from { transform: translateY(0); }
-  to { transform: translateY(-1000px); }
+@keyframes floatUp {
+  from { transform: translateY(100vh); }
+  to { transform: translateY(-10vh); }
 }
 
-/* Text styles */
+/* Text */
 h1 {
-  font-size: 28px;
+  font-size: 26px;
   padding: 20px;
+  animation: fadeUp 2s ease;
 }
 
-h2 {
-  font-size: 24px;
-}
-
-.small {
-  opacity: 0.7;
-  font-size: 18px;
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* Heart pulse */
 .heart {
   color: #ff4d6d;
-  animation: pulse 1.5s infinite;
+  animation: heartbeat 1.2s infinite;
 }
 
-@keyframes pulse {
+@keyframes heartbeat {
   0%,100% { transform: scale(1); }
-  50% { transform: scale(1.2); }
+  25% { transform: scale(1.3); }
+  50% { transform: scale(1); }
+}
+
+/* Suspense blur */
+.blur {
+  filter: blur(6px);
+  opacity: 0.6;
 }
 
 /* Reveal */
 .reveal {
-  font-size: 42px;
-  letter-spacing: 10px;
+  font-size: 46px;
+  letter-spacing: 12px;
   color: gold;
-  text-shadow: 0 0 10px gold, 0 0 30px gold;
+  text-shadow: 0 0 10px gold, 0 0 40px gold;
   opacity: 0;
-  transform: scale(0.8);
-  transition: all 1.5s ease;
+  transform: scale(0.5);
 }
 
-.reveal.show {
-  opacity: 1;
-  transform: scale(1);
+/* Light burst */
+.burst {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: gold;
+  border-radius: 50%;
+  opacity: 0;
 }
 
-/* Mobile tuning */
-@media (max-width: 600px) {
+.burst.animate {
+  animation: explode 1.5s ease-out forwards;
+}
+
+@keyframes explode {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(80); opacity: 0; }
+}
+
+/* Mobile */
+@media(max-width:600px){
   h1 { font-size: 22px; }
   .reveal { font-size: 34px; }
 }
@@ -100,33 +118,34 @@ h2 {
 
 <body>
 
-<div class="stars"></div>
+<div class="particles" id="particles"></div>
 
 <!-- Scene 1 -->
-<div class="scene active" id="scene1">
+<div class="scene active">
   <h1>Some stories are written in the stars...</h1>
 </div>
 
 <!-- Scene 2 -->
-<div class="scene" id="scene2">
-  <h2>Ramesh Sai <span class="heart">❤</span> Sri Laya</h2>
+<div class="scene">
+  <h1>Ramesh Sai <span class="heart">❤</span> Sri Laya</h1>
 </div>
 
 <!-- Scene 3 -->
-<div class="scene" id="scene3">
-  <p>We waited...</p>
-  <p>We dreamed...</p>
-  <p>For this moment...</p>
+<div class="scene">
+  <h1>We waited...</h1>
+  <h1>We dreamed...</h1>
+  <h1>For this moment...</h1>
 </div>
 
 <!-- Scene 4 -->
-<div class="scene" id="scene4">
-  <p class="small">And then...</p>
-  <p class="small">Everything changed</p>
+<div class="scene">
+  <h1 class="blur">And then...</h1>
+  <h1 class="blur">Everything changed</h1>
 </div>
 
 <!-- Scene 5 -->
-<div class="scene" id="scene5">
+<div class="scene">
+  <div class="burst" id="burst"></div>
   <h1 id="name" class="reveal"></h1>
 </div>
 
@@ -134,52 +153,72 @@ h2 {
 const scenes = document.querySelectorAll(".scene");
 let current = 0;
 
+// Scene timings
+const timings = [3000, 3000, 3500, 3000, 4000];
+
 function showScene(index) {
   scenes.forEach(s => s.classList.remove("active"));
   scenes[index].classList.add("active");
 }
 
-// Scene timing (in ms)
-const timings = [3000, 3000, 3500, 3000, 4000];
+// Particle generator
+const container = document.getElementById("particles");
+for (let i = 0; i < 60; i++) {
+  const p = document.createElement("span");
+  p.style.left = Math.random() * 100 + "vw";
+  p.style.animationDuration = (5 + Math.random() * 10) + "s";
+  p.style.opacity = Math.random();
+  container.appendChild(p);
+}
 
-function playScenes() {
+// Play sequence
+function play() {
   let total = 0;
 
-  timings.forEach((time, i) => {
+  timings.forEach((t, i) => {
     setTimeout(() => {
       showScene(i);
 
-      if (i === 4) revealName("GATIK");
+      if (i === 4) {
+        triggerReveal();
+      }
 
     }, total);
 
-    total += time;
+    total += t;
   });
 }
 
-let revealed = false;
+function triggerReveal() {
+  const burst = document.getElementById("burst");
+  const name = document.getElementById("name");
 
-function revealName(text) {
-  if (revealed) return;
-  revealed = true;
+  burst.classList.add("animate");
 
-  const el = document.getElementById("name");
-  el.classList.add("show");
+  setTimeout(() => {
+    name.style.opacity = 1;
+    name.style.transform = "scale(1)";
+    typeName("GATIK");
+  }, 800);
+}
 
+function typeName(text) {
   let i = 0;
+  const el = document.getElementById("name");
+
   function type() {
     if (i < text.length) {
       el.innerHTML += text[i];
       i++;
-      setTimeout(type, 150);
+      setTimeout(type, 120);
     }
   }
 
-  setTimeout(type, 500);
+  type();
 }
 
 // Start automatically
-playScenes();
+play();
 </script>
 
 </body>
