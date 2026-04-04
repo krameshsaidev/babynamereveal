@@ -8,71 +8,81 @@
 <style>
 body {
   margin: 0;
-  font-family: 'Segoe UI', sans-serif;
   background: black;
   color: white;
-  overflow-x: hidden;
+  font-family: 'Segoe UI', sans-serif;
+  overflow: hidden;
 }
 
-/* Sections */
-.section {
-  height: 100vh;
+/* Scene container */
+.scene {
+  position: absolute;
+  width: 100%;
+  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
   text-align: center;
-  padding: 20px;
+  opacity: 0;
+  transition: opacity 1.5s ease;
 }
 
-/* Star background */
+.scene.active {
+  opacity: 1;
+}
+
+/* Stars background */
 .stars {
-  position: fixed;
+  position: absolute;
   width: 100%;
   height: 100%;
   background: radial-gradient(white 1px, transparent 1px);
   background-size: 3px 3px;
-  opacity: 0.2;
-  animation: moveStars 60s linear infinite;
+  opacity: 0.15;
+  animation: moveStars 80s linear infinite;
 }
 
 @keyframes moveStars {
-  from {transform: translateY(0);}
-  to {transform: translateY(-1000px);}
+  from { transform: translateY(0); }
+  to { transform: translateY(-1000px); }
 }
 
-/* Fade animation */
-.fade {
-  opacity: 0;
-  transform: translateY(40px);
-  transition: all 1.5s ease;
+/* Text styles */
+h1 {
+  font-size: 28px;
+  padding: 20px;
 }
 
-.fade.show {
-  opacity: 1;
-  transform: translateY(0);
+h2 {
+  font-size: 24px;
 }
 
-/* Parents */
+.small {
+  opacity: 0.7;
+  font-size: 18px;
+}
+
+/* Heart pulse */
 .heart {
   color: #ff4d6d;
-  font-size: 28px;
   animation: pulse 1.5s infinite;
 }
 
 @keyframes pulse {
-  0%,100% {transform: scale(1);}
-  50% {transform: scale(1.2);}
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
 }
 
 /* Reveal */
 .reveal {
-  font-size: 60px;
-  letter-spacing: 15px;
+  font-size: 42px;
+  letter-spacing: 10px;
   color: gold;
+  text-shadow: 0 0 10px gold, 0 0 30px gold;
   opacity: 0;
   transform: scale(0.8);
-  transition: 2s ease;
+  transition: all 1.5s ease;
 }
 
 .reveal.show {
@@ -80,20 +90,10 @@ body {
   transform: scale(1);
 }
 
-/* Glow */
-.glow {
-  text-shadow: 0 0 10px gold, 0 0 30px gold;
-}
-
-/* Suspense */
-.suspense {
-  font-size: 22px;
-  opacity: 0.7;
-}
-
-/* Small screens */
-@media(max-width:600px){
-  .reveal { font-size: 40px; letter-spacing: 8px; }
+/* Mobile tuning */
+@media (max-width: 600px) {
+  h1 { font-size: 22px; }
+  .reveal { font-size: 34px; }
 }
 </style>
 </head>
@@ -103,55 +103,59 @@ body {
 <div class="stars"></div>
 
 <!-- Scene 1 -->
-<section class="section fade">
+<div class="scene active" id="scene1">
   <h1>Some stories are written in the stars...</h1>
-</section>
+</div>
 
 <!-- Scene 2 -->
-<section class="section fade">
-  <h2>
-    Ramesh Sai <span class="heart">❤</span> Sri Laya
-  </h2>
-</section>
+<div class="scene" id="scene2">
+  <h2>Ramesh Sai <span class="heart">❤</span> Sri Laya</h2>
+</div>
 
 <!-- Scene 3 -->
-<section class="section fade">
+<div class="scene" id="scene3">
   <p>We waited...</p>
   <p>We dreamed...</p>
   <p>For this moment...</p>
-</section>
+</div>
 
 <!-- Scene 4 -->
-<section class="section fade">
-  <p class="suspense">And then...</p>
-  <p class="suspense">Everything changed</p>
-</section>
+<div class="scene" id="scene4">
+  <p class="small">And then...</p>
+  <p class="small">Everything changed</p>
+</div>
 
 <!-- Scene 5 -->
-<section class="section">
-  <h1 id="name" class="reveal glow"></h1>
-</section>
+<div class="scene" id="scene5">
+  <h1 id="name" class="reveal"></h1>
+</div>
 
 <script>
-const fades = document.querySelectorAll(".fade");
-const nameEl = document.getElementById("name");
+const scenes = document.querySelectorAll(".scene");
+let current = 0;
 
-window.addEventListener("scroll", () => {
-  const triggerBottom = window.innerHeight * 0.85;
+function showScene(index) {
+  scenes.forEach(s => s.classList.remove("active"));
+  scenes[index].classList.add("active");
+}
 
-  fades.forEach(section => {
-    const boxTop = section.getBoundingClientRect().top;
+// Scene timing (in ms)
+const timings = [3000, 3000, 3500, 3000, 4000];
 
-    if (boxTop < triggerBottom) {
-      section.classList.add("show");
-    }
+function playScenes() {
+  let total = 0;
+
+  timings.forEach((time, i) => {
+    setTimeout(() => {
+      showScene(i);
+
+      if (i === 4) revealName("GATIK");
+
+    }, total);
+
+    total += time;
   });
-
-  // Reveal trigger
-  if (window.scrollY > window.innerHeight * 3.5) {
-    revealName("GATIK");
-  }
-});
+}
 
 let revealed = false;
 
@@ -159,19 +163,23 @@ function revealName(text) {
   if (revealed) return;
   revealed = true;
 
-  nameEl.classList.add("show");
+  const el = document.getElementById("name");
+  el.classList.add("show");
 
   let i = 0;
   function type() {
     if (i < text.length) {
-      nameEl.innerHTML += text[i];
+      el.innerHTML += text[i];
       i++;
-      setTimeout(type, 180);
+      setTimeout(type, 150);
     }
   }
 
   setTimeout(type, 500);
 }
+
+// Start automatically
+playScenes();
 </script>
 
 </body>
