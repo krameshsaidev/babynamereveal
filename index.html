@@ -3,161 +3,134 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Baby Reveal</title>
+<title>Divine Reveal</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap" rel="stylesheet">
 
 <style>
 body {
   margin: 0;
-  background: radial-gradient(circle at center, #0b0b0f, #000);
+  background: radial-gradient(circle, #0a0a0f, #000);
   overflow: hidden;
-  font-family: 'Arial Black', sans-serif;
   color: white;
+  font-family: 'Cinzel', serif;
 }
 
-/* Center container */
+/* Center */
 .container {
   position: absolute;
   width: 100%;
   height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  display:flex;
+  justify-content:center;
+  align-items:center;
 }
 
 /* Cinematic text */
 .text {
-  position: absolute;
-  opacity: 0;
-  transform: scale(0.9);
+  position:absolute;
+  opacity:0;
+  transform:scale(0.85);
   transition: all 1.5s ease;
-  text-align: center;
-  letter-spacing: 3px;
+  text-align:center;
+  letter-spacing:4px;
 }
 
 .show {
-  opacity: 1;
-  transform: scale(1);
+  opacity:1;
+  transform:scale(1);
 }
 
-/* Netflix style title */
+/* Trailer style */
 .title {
   font-size: 2rem;
-  text-transform: uppercase;
-  color: #ccc;
+  color:#ddd;
+  text-transform:uppercase;
 }
 
-/* Name reveal 3D */
+/* Name */
 .name {
   font-size: 3rem;
   color: gold;
-  letter-spacing: 8px;
   text-shadow:
-    0 2px 0 #b89600,
-    0 4px 0 #a38300,
-    0 8px 15px rgba(255,215,0,0.5),
-    0 0 40px gold;
-  transform: perspective(800px) rotateX(10deg);
-}
-
-/* Shockwave */
-.shockwave {
-  position: absolute;
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  border: 2px solid gold;
-  opacity: 0;
-}
-
-@keyframes shock {
-  0% {
-    transform: scale(0.2);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(8);
-    opacity: 0;
-  }
-}
-
-/* Glow pulse */
-@keyframes glowPulse {
-  0% { text-shadow: 0 0 10px gold; }
-  50% { text-shadow: 0 0 40px gold; }
-  100% { text-shadow: 0 0 10px gold; }
-}
-
-.glow {
-  animation: glowPulse 2s infinite;
+    0 0 10px gold,
+    0 0 30px rgba(255,215,0,0.8),
+    0 0 60px rgba(255,215,0,0.5);
 }
 
 /* Canvas */
 canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
+  position:absolute;
+  top:0;
+  left:0;
 }
 </style>
 </head>
 
 <body>
 
-<canvas id="particles"></canvas>
+<canvas id="canvas"></canvas>
 
 <div class="container">
-
-  <div id="s1" class="text title">A new soul arrives...</div>
-  <div id="s2" class="text title">A new journey begins...</div>
-  <div id="s3" class="text title">Our hearts are full...</div>
-
-  <div id="s4" class="text title glow">It's a Boy</div>
-
+  <div id="s1" class="text title">A Divine Blessing...</div>
+  <div id="s2" class="text title">A New Beginning...</div>
+  <div id="s3" class="text title">From the Universe...</div>
+  <div id="s4" class="text title">A Soul Arrives</div>
   <div id="s5" class="text title">Presenting...</div>
-
-  <div id="s6" class="text">
-    <div class="name">GATIK</div>
-  </div>
-
-  <div id="shock" class="shockwave"></div>
-
+  <div id="s6" class="text name">GATIK</div>
 </div>
 
 <script>
-// SCENE FLOW
+// FONT LOAD DELAY (cinematic feel)
+document.fonts.ready.then(() => {
+  setTimeout(startShow, 500);
+});
+
+// SCENES
 const scenes = ["s1","s2","s3","s4","s5","s6"];
 let i = 0;
 
-function nextScene() {
-  if (i > 0) {
-    document.getElementById(scenes[i - 1]).classList.remove("show");
-  }
+function startShow(){
+  nextScene();
+}
 
-  if (i < scenes.length) {
+function nextScene(){
+  if(i>0) document.getElementById(scenes[i-1]).classList.remove("show");
+
+  if(i<scenes.length){
     document.getElementById(scenes[i]).classList.add("show");
 
-    // Trigger shockwave on final reveal
-    if (i === 5) triggerShockwave();
+    if(i===5){
+      playBell();
+      particleText();
+    }
 
     i++;
-    setTimeout(nextScene, i === 5 ? 2500 : 1800);
+    setTimeout(nextScene, i===5 ? 2500 : 1800);
   }
 }
 
-setTimeout(nextScene, 1000);
+// TEMPLE BELL SOUND (no file)
+function playBell(){
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
 
+  osc.type = "sine";
+  osc.frequency.setValueAtTime(432, ctx.currentTime);
 
-// SHOCKWAVE
-function triggerShockwave() {
-  const shock = document.getElementById("shock");
-  shock.style.left = "50%";
-  shock.style.top = "50%";
-  shock.style.transform = "translate(-50%, -50%)";
-  shock.style.animation = "shock 1.5s ease-out";
+  gain.gain.setValueAtTime(1, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 3);
+
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+
+  osc.start();
+  osc.stop(ctx.currentTime + 3);
 }
 
-
-// GOLDEN PARTICLES
-const canvas = document.getElementById("particles");
+// PARTICLE TEXT FORMATION
+const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
 canvas.width = window.innerWidth;
@@ -165,34 +138,55 @@ canvas.height = window.innerHeight;
 
 let particles = [];
 
-for (let i = 0; i < 120; i++) {
-  particles.push({
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height,
-    size: Math.random() * 2,
-    speedX: (Math.random() - 0.5),
-    speedY: (Math.random() - 0.5)
-  });
+function particleText(){
+  const off = document.createElement("canvas");
+  const offCtx = off.getContext("2d");
+
+  off.width = canvas.width;
+  off.height = canvas.height;
+
+  offCtx.fillStyle = "white";
+  offCtx.font = "bold 80px Cinzel";
+  offCtx.textAlign = "center";
+  offCtx.fillText("GATIK", off.width/2, off.height/2);
+
+  const data = offCtx.getImageData(0,0,off.width,off.height).data;
+
+  particles = [];
+
+  for(let y=0; y<off.height; y+=6){
+    for(let x=0; x<off.width; x+=6){
+      const index = (y * off.width + x) * 4;
+      if(data[index] > 128){
+        particles.push({
+          x: Math.random()*canvas.width,
+          y: Math.random()*canvas.height,
+          tx: x,
+          ty: y,
+          size:2
+        });
+      }
+    }
+  }
+
+  animateParticles();
 }
 
-function animate() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+function animateParticles(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  particles.forEach(p => {
-    p.x += p.speedX;
-    p.y += p.speedY;
+  particles.forEach(p=>{
+    p.x += (p.tx - p.x)*0.08;
+    p.y += (p.ty - p.y)*0.08;
 
     ctx.beginPath();
-    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-    ctx.fillStyle = "gold";
+    ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+    ctx.fillStyle="gold";
     ctx.fill();
   });
 
-  requestAnimationFrame(animate);
+  requestAnimationFrame(animateParticles);
 }
-
-animate();
-
 </script>
 
 </body>
