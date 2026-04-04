@@ -14,7 +14,7 @@ body {
   overflow: hidden;
 }
 
-/* Scene system */
+/* Scene */
 .scene {
   position: absolute;
   width: 100%;
@@ -22,90 +22,54 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  flex-direction: column;
   text-align: center;
+  flex-direction: column;
   opacity: 0;
-  transform: scale(1.05);
-  transition: opacity 1.5s ease, transform 2s ease;
+  transition: opacity 1.5s ease;
 }
 
-.scene.active {
-  opacity: 1;
-  transform: scale(1);
-}
-
-/* Floating particles */
-.particles span {
-  position: absolute;
-  width: 2px;
-  height: 2px;
-  background: white;
-  opacity: 0.4;
-  animation: floatUp linear infinite;
-}
-
-@keyframes floatUp {
-  from { transform: translateY(100vh); }
-  to { transform: translateY(-10vh); }
-}
+.scene.active { opacity: 1; }
 
 /* Text */
 h1 {
   font-size: 26px;
   padding: 20px;
-  animation: fadeUp 2s ease;
 }
 
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(30px); }
-  to { opacity: 1; transform: translateY(0); }
+/* Suspense blink */
+.blink {
+  animation: blink 1s infinite;
+}
+@keyframes blink {
+  50% { opacity: 0.2; }
 }
 
-/* Heart pulse */
-.heart {
-  color: #ff4d6d;
-  animation: heartbeat 1.2s infinite;
+/* Flash */
+.flash {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background: white;
+  opacity: 0;
+  pointer-events: none;
 }
 
-@keyframes heartbeat {
-  0%,100% { transform: scale(1); }
-  25% { transform: scale(1.3); }
-  50% { transform: scale(1); }
-}
-
-/* Suspense blur */
-.blur {
-  filter: blur(6px);
-  opacity: 0.6;
-}
-
-/* Reveal */
+/* Reveal text */
 .reveal {
-  font-size: 46px;
+  font-size: 48px;
   letter-spacing: 12px;
   color: gold;
-  text-shadow: 0 0 10px gold, 0 0 40px gold;
+  text-shadow: 0 0 20px gold;
   opacity: 0;
   transform: scale(0.5);
+  transition: all 1.5s ease;
 }
 
-/* Light burst */
-.burst {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  background: gold;
-  border-radius: 50%;
-  opacity: 0;
-}
-
-.burst.animate {
-  animation: explode 1.5s ease-out forwards;
-}
-
-@keyframes explode {
-  0% { transform: scale(1); opacity: 1; }
-  100% { transform: scale(80); opacity: 0; }
+/* Canvas */
+canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
 }
 
 /* Mobile */
@@ -118,107 +82,138 @@ h1 {
 
 <body>
 
-<div class="particles" id="particles"></div>
+<canvas id="canvas"></canvas>
+<div class="flash" id="flash"></div>
 
-<!-- Scene 1 -->
-<div class="scene active">
+<!-- Scenes -->
+<div class="scene active" id="s1">
   <h1>Some stories are written in the stars...</h1>
 </div>
 
-<!-- Scene 2 -->
-<div class="scene">
-  <h1>Ramesh Sai <span class="heart">❤</span> Sri Laya</h1>
+<div class="scene" id="s2">
+  <h1>Ramesh Sai ❤️ Sri Laya</h1>
 </div>
 
-<!-- Scene 3 -->
-<div class="scene">
+<div class="scene" id="s3">
   <h1>We waited...</h1>
   <h1>We dreamed...</h1>
-  <h1>For this moment...</h1>
 </div>
 
-<!-- Scene 4 -->
-<div class="scene">
-  <h1 class="blur">And then...</h1>
-  <h1 class="blur">Everything changed</h1>
+<div class="scene" id="s4">
+  <h1 class="blink">And then...</h1>
+  <h1 class="blink">Everything changed</h1>
 </div>
 
-<!-- Scene 5 -->
-<div class="scene">
-  <div class="burst" id="burst"></div>
+<div class="scene" id="s5">
   <h1 id="name" class="reveal"></h1>
 </div>
 
 <script>
-const scenes = document.querySelectorAll(".scene");
-let current = 0;
+const scenes = ["s1","s2","s3","s4","s5"];
+const timings = [2500, 2500, 3000, 3500];
 
-// Scene timings
-const timings = [3000, 3000, 3500, 3000, 4000];
-
-function showScene(index) {
-  scenes.forEach(s => s.classList.remove("active"));
-  scenes[index].classList.add("active");
+function show(id){
+  document.querySelectorAll(".scene").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
 }
 
-// Particle generator
-const container = document.getElementById("particles");
-for (let i = 0; i < 60; i++) {
-  const p = document.createElement("span");
-  p.style.left = Math.random() * 100 + "vw";
-  p.style.animationDuration = (5 + Math.random() * 10) + "s";
-  p.style.opacity = Math.random();
-  container.appendChild(p);
-}
+/* CINEMATIC TIMELINE */
+function timeline(){
+  let t = 0;
 
-// Play sequence
-function play() {
-  let total = 0;
-
-  timings.forEach((t, i) => {
-    setTimeout(() => {
-      showScene(i);
-
-      if (i === 4) {
-        triggerReveal();
-      }
-
-    }, total);
-
-    total += t;
+  timings.forEach((d,i)=>{
+    setTimeout(()=>show(scenes[i]), t);
+    t += d;
   });
+
+  // suspense pause (no scene change)
+  setTimeout(()=>{
+    glitchFlash();
+  }, t);
+
+  setTimeout(()=>{
+    show("s5");
+    explode();
+  }, t + 1200);
 }
 
-function triggerReveal() {
-  const burst = document.getElementById("burst");
-  const name = document.getElementById("name");
+/* FLASH + SHAKE */
+function glitchFlash(){
+  const flash = document.getElementById("flash");
 
-  burst.classList.add("animate");
+  flash.style.opacity = 1;
+  setTimeout(()=>flash.style.opacity = 0, 100);
 
-  setTimeout(() => {
-    name.style.opacity = 1;
-    name.style.transform = "scale(1)";
-    typeName("GATIK");
-  }, 800);
+  document.body.style.transform = "scale(1.02)";
+  setTimeout(()=>document.body.style.transform = "scale(1)", 150);
 }
 
-function typeName(text) {
-  let i = 0;
+/* CANVAS PARTICLE EXPLOSION */
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let particles = [];
+
+function explode(){
+  for(let i=0;i<120;i++){
+    particles.push({
+      x: canvas.width/2,
+      y: canvas.height/2,
+      angle: Math.random()*2*Math.PI,
+      speed: Math.random()*6+2,
+      size: Math.random()*3+1,
+      life: 100
+    });
+  }
+
+  animateParticles();
+
+  setTimeout(()=>revealName("GATIK"), 600);
+}
+
+function animateParticles(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  particles.forEach(p=>{
+    p.x += Math.cos(p.angle)*p.speed;
+    p.y += Math.sin(p.angle)*p.speed;
+    p.life--;
+
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+    ctx.fillStyle = "gold";
+    ctx.fill();
+  });
+
+  particles = particles.filter(p=>p.life>0);
+
+  if(particles.length>0){
+    requestAnimationFrame(animateParticles);
+  }
+}
+
+/* NAME REVEAL */
+function revealName(text){
   const el = document.getElementById("name");
+  el.style.opacity = 1;
+  el.style.transform = "scale(1)";
 
-  function type() {
-    if (i < text.length) {
+  let i = 0;
+  function type(){
+    if(i < text.length){
       el.innerHTML += text[i];
       i++;
       setTimeout(type, 120);
     }
   }
-
   type();
 }
 
-// Start automatically
-play();
+/* START */
+timeline();
 </script>
 
 </body>
