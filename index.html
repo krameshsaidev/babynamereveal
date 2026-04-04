@@ -61,11 +61,6 @@ body {
   text-shadow: 0 0 20px gold;
 }
 
-/* Glow */
-.glow {
-  text-shadow: 0 0 20px gold;
-}
-
 /* Flash */
 .flash {
   position: absolute;
@@ -108,7 +103,7 @@ canvas {
     <p>He is not just born…<br>he is meant to be.</p>
   </div>
 
-  <div id="s5" class="text glow">
+  <div id="s5" class="text">
     <p>✨ Presenting…</p>
   </div>
 
@@ -129,7 +124,7 @@ function nextScene() {
     let delay = (i === 4) ? 2200 : 1600;
     setTimeout(nextScene, delay);
   } else {
-    setTimeout(reveal, 1800); // suspense pause
+    setTimeout(reveal, 1800);
   }
 }
 
@@ -156,41 +151,38 @@ window.addEventListener("resize", resize);
 
 let particles = [];
 
-// Celebration burst
-function burst(x, y) {
-  for (let i = 0; i < 20; i++) {
-    particles.push({
-      x,
-      y,
-      vx: (Math.random() - 0.5) * 6,
-      vy: (Math.random() - 0.5) * 6,
-      life: 60
-    });
-  }
+// Continuous background confetti
+for (let i = 0; i < 120; i++) {
+  particles.push({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    vy: Math.random() * 1 + 0.5,
+    size: Math.random() * 2 + 1
+  });
 }
 
-// Animate particles
 function animateParticles() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  particles.forEach((p, index) => {
-    p.x += p.vx;
+  particles.forEach(p => {
     p.y += p.vy;
-    p.life--;
+
+    if (p.y > canvas.height) {
+      p.y = 0;
+      p.x = Math.random() * canvas.width;
+    }
 
     ctx.beginPath();
-    ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
     ctx.fillStyle = "gold";
     ctx.fill();
-
-    if (p.life <= 0) particles.splice(index, 1);
   });
 
   requestAnimationFrame(animateParticles);
 }
 animateParticles();
 
-// Letter reveal with celebration
+// Letter reveal
 function showNameLetters() {
   const name = "GATIK";
   const container = document.getElementById("s6");
@@ -206,12 +198,25 @@ function showNameLetters() {
     setTimeout(() => {
       span.classList.add("show");
 
-      // Celebration burst at letter position
-      const rect = span.getBoundingClientRect();
-      burst(rect.left + rect.width / 2, rect.top + rect.height / 2);
+      // FINAL CELEBRATION BOOST on last letter
+      if (index === name.length - 1) {
+        boostCelebration();
+      }
 
-    }, index * 700); // slower = more dramatic
+    }, index * 700);
   });
+}
+
+// Boost effect
+function boostCelebration() {
+  for (let i = 0; i < 80; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      vy: Math.random() * 2 + 1,
+      size: Math.random() * 3 + 1
+    });
+  }
 }
 
 // Start
