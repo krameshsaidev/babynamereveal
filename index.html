@@ -3,18 +3,33 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Our Little Miracle</title>
+<title>Royal Baby Reveal</title>
 
 <style>
 body {
   margin: 0;
-  background: black;
-  color: white;
   font-family: 'Segoe UI', sans-serif;
   overflow: hidden;
+  color: white;
 }
 
-/* Scene */
+/* Gradient background animation */
+.bg {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(-45deg, #1a0033, #330066, #660033, #000428);
+  background-size: 400% 400%;
+  animation: gradientMove 10s ease infinite;
+}
+
+@keyframes gradientMove {
+  0% {background-position: 0% 50%;}
+  50% {background-position: 100% 50%;}
+  100% {background-position: 0% 50%;}
+}
+
+/* Scene system */
 .scene {
   position: absolute;
   width: 100%;
@@ -22,103 +37,136 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  text-align: center;
   flex-direction: column;
+  text-align: center;
   opacity: 0;
-  transition: opacity 1.5s ease;
-}
-
-.scene.active { opacity: 1; }
-
-/* Text */
-h1 {
-  font-size: 26px;
-  padding: 20px;
-}
-
-/* Suspense blink */
-.blink {
-  animation: blink 1s infinite;
-}
-@keyframes blink {
-  50% { opacity: 0.2; }
-}
-
-/* Flash */
-.flash {
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  background: white;
-  opacity: 0;
-  pointer-events: none;
-}
-
-/* Reveal text */
-.reveal {
-  font-size: 48px;
-  letter-spacing: 12px;
-  color: gold;
-  text-shadow: 0 0 20px gold;
-  opacity: 0;
-  transform: scale(0.5);
+  transform: scale(1.1);
   transition: all 1.5s ease;
 }
 
-/* Canvas */
-canvas {
-  position: fixed;
-  top: 0;
-  left: 0;
+.scene.active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Text styles */
+h1 {
+  font-size: 28px;
+  letter-spacing: 2px;
+  padding: 20px;
+}
+
+.elegant {
+  font-size: 22px;
+  opacity: 0.8;
+}
+
+/* Glow text */
+.gold {
+  color: #ffd700;
+  text-shadow: 0 0 10px #ffd700, 0 0 40px #ffcc00;
+}
+
+/* Floating light orbs */
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(40px);
+  opacity: 0.5;
+  animation: float 8s infinite ease-in-out;
+}
+
+@keyframes float {
+  0% {transform: translateY(0);}
+  50% {transform: translateY(-50px);}
+  100% {transform: translateY(0);}
+}
+
+/* Reveal animation */
+.reveal {
+  font-size: 48px;
+  letter-spacing: 12px;
+  opacity: 0;
+  transform: scale(0.5) rotateX(90deg);
+  transition: all 1.5s ease;
+}
+
+.reveal.show {
+  opacity: 1;
+  transform: scale(1) rotateX(0deg);
+}
+
+/* Shine sweep */
+.shine {
+  position: absolute;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,0.6), transparent);
+  transform: translateX(-100%);
+  animation: shineMove 2s ease forwards;
+}
+
+@keyframes shineMove {
+  to { transform: translateX(100%); }
 }
 
 /* Mobile */
 @media(max-width:600px){
   h1 { font-size: 22px; }
-  .reveal { font-size: 34px; }
+  .reveal { font-size: 36px; }
 }
 </style>
 </head>
 
 <body>
 
-<canvas id="canvas"></canvas>
-<div class="flash" id="flash"></div>
+<div class="bg"></div>
 
-<!-- Scenes -->
+<!-- Light orbs -->
+<div class="orb" style="width:200px;height:200px;background:#ff00cc;top:10%;left:20%;"></div>
+<div class="orb" style="width:150px;height:150px;background:#00ccff;bottom:20%;right:20%;"></div>
+
+<!-- Scene 1 -->
 <div class="scene active" id="s1">
-  <h1>Some stories are written in the stars...</h1>
+  <h1>Something magical is about to begin...</h1>
 </div>
 
+<!-- Scene 2 -->
 <div class="scene" id="s2">
-  <h1>Ramesh Sai ❤️ Sri Laya</h1>
+  <h1 class="gold">Ramesh Sai & Sri Laya</h1>
+  <p class="elegant">A beautiful journey of love...</p>
 </div>
 
+<!-- Scene 3 -->
 <div class="scene" id="s3">
-  <h1>We waited...</h1>
-  <h1>We dreamed...</h1>
+  <h1>Dreams turned into hope...</h1>
+  <h1>Hope turned into life...</h1>
 </div>
 
+<!-- Scene 4 -->
 <div class="scene" id="s4">
-  <h1 class="blink">And then...</h1>
-  <h1 class="blink">Everything changed</h1>
+  <h1 class="elegant">And then…</h1>
+  <h1 class="gold">A miracle arrived</h1>
 </div>
 
+<!-- Scene 5 -->
 <div class="scene" id="s5">
-  <h1 id="name" class="reveal"></h1>
+  <div id="nameBox" style="position:relative;">
+    <div class="shine" id="shine"></div>
+    <h1 id="name" class="reveal gold"></h1>
+  </div>
 </div>
 
 <script>
 const scenes = ["s1","s2","s3","s4","s5"];
-const timings = [2500, 2500, 3000, 3500];
+const timings = [2500, 3000, 3000, 3000];
 
 function show(id){
   document.querySelectorAll(".scene").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
 }
 
-/* CINEMATIC TIMELINE */
-function timeline(){
+function play(){
   let t = 0;
 
   timings.forEach((d,i)=>{
@@ -126,94 +174,24 @@ function timeline(){
     t += d;
   });
 
-  // suspense pause (no scene change)
-  setTimeout(()=>{
-    glitchFlash();
-  }, t);
-
   setTimeout(()=>{
     show("s5");
-    explode();
-  }, t + 1200);
+    revealName("GATIK");
+  }, t);
 }
 
-/* FLASH + SHAKE */
-function glitchFlash(){
-  const flash = document.getElementById("flash");
-
-  flash.style.opacity = 1;
-  setTimeout(()=>flash.style.opacity = 0, 100);
-
-  document.body.style.transform = "scale(1.02)";
-  setTimeout(()=>document.body.style.transform = "scale(1)", 150);
-}
-
-/* CANVAS PARTICLE EXPLOSION */
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
-
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-let particles = [];
-
-function explode(){
-  for(let i=0;i<120;i++){
-    particles.push({
-      x: canvas.width/2,
-      y: canvas.height/2,
-      angle: Math.random()*2*Math.PI,
-      speed: Math.random()*6+2,
-      size: Math.random()*3+1,
-      life: 100
-    });
-  }
-
-  animateParticles();
-
-  setTimeout(()=>revealName("GATIK"), 600);
-}
-
-function animateParticles(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-
-  particles.forEach(p=>{
-    p.x += Math.cos(p.angle)*p.speed;
-    p.y += Math.sin(p.angle)*p.speed;
-    p.life--;
-
-    ctx.beginPath();
-    ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
-    ctx.fillStyle = "gold";
-    ctx.fill();
-  });
-
-  particles = particles.filter(p=>p.life>0);
-
-  if(particles.length>0){
-    requestAnimationFrame(animateParticles);
-  }
-}
-
-/* NAME REVEAL */
 function revealName(text){
   const el = document.getElementById("name");
-  el.style.opacity = 1;
-  el.style.transform = "scale(1)";
+  const shine = document.getElementById("shine");
 
-  let i = 0;
-  function type(){
-    if(i < text.length){
-      el.innerHTML += text[i];
-      i++;
-      setTimeout(type, 120);
-    }
-  }
-  type();
+  el.innerHTML = text;
+  el.classList.add("show");
+
+  shine.style.display = "block";
 }
 
-/* START */
-timeline();
+// start
+play();
 </script>
 
 </body>
