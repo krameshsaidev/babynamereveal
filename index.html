@@ -3,26 +3,72 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Divine Reveal</title>
+<title>Baby Reveal</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap" rel="stylesheet">
 
 <style>
+* { box-sizing: border-box; }
+
 body {
-  margin:0;
-  overflow:hidden;
-  font-family:'Cinzel', serif;
-  background: radial-gradient(circle at center, #1a1200, #000);
-  color:white;
+  margin: 0;
+  overflow: hidden;
+  font-family: 'Cinzel', serif;
+  background: radial-gradient(circle, #1a1200, #000);
+  color: white;
 }
 
-/* Floating divine glow */
+/* Mobile-safe container */
+.container {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Text block */
+.text {
+  position: absolute;
+  width: 90%;
+  text-align: center;
+  opacity: 0;
+  transform: scale(0.95);
+  transition: all 1.2s ease;
+  padding: 0 10px;
+}
+
+/* Responsive font */
+.text p {
+  font-size: clamp(1.2rem, 5vw, 1.8rem);
+  letter-spacing: 2px;
+  line-height: 1.4;
+}
+
+.show {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Name styling */
+.name {
+  font-size: clamp(2rem, 10vw, 3.5rem);
+  color: gold;
+  letter-spacing: 6px;
+  text-shadow:
+    0 0 10px gold,
+    0 0 40px rgba(255,215,0,0.7);
+}
+
+/* Background glow */
 .bg-glow {
-  position:absolute;
-  width:200%;
-  height:200%;
-  background: radial-gradient(circle, rgba(255,215,0,0.08), transparent);
-  animation: float 10s infinite linear;
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,215,0,0.1), transparent);
+  animation: float 12s linear infinite;
+  z-index: 0;
 }
 
 @keyframes float {
@@ -30,66 +76,25 @@ body {
   to { transform: translate(10%, 10%); }
 }
 
-/* Center */
-.container {
-  position:absolute;
-  width:100%;
-  height:100%;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  text-align:center;
-}
-
-/* Text */
-.text {
-  position:absolute;
-  opacity:0;
-  transform: scale(0.95);
-  transition: all 1.5s ease;
-  letter-spacing:4px;
-}
-
-.show {
-  opacity:1;
-  transform: scale(1);
-}
-
-/* Breathing glow */
-@keyframes breathe {
-  0% { text-shadow:0 0 10px gold; }
-  50% { text-shadow:0 0 40px gold; }
-  100% { text-shadow:0 0 10px gold; }
-}
-
-.breathe {
-  animation:breathe 2.5s infinite;
-}
-
-/* Name */
-.name {
-  font-size:3.2rem;
-  color:gold;
-  letter-spacing:10px;
-  text-shadow:
-    0 0 20px gold,
-    0 0 60px rgba(255,215,0,0.6);
-}
-
-/* Shock flash */
-.flash {
-  position:absolute;
-  width:100%;
-  height:100%;
-  background: radial-gradient(circle, rgba(255,215,0,0.8), transparent);
-  opacity:0;
-}
-
 /* Canvas */
 canvas {
-  position:absolute;
-  top:0;
-  left:0;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+/* Text above canvas */
+.text { z-index: 2; }
+
+/* Flash */
+.flash {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(255,215,0,0.7), transparent);
+  opacity: 0;
+  z-index: 3;
 }
 </style>
 </head>
@@ -97,97 +102,68 @@ canvas {
 <body>
 
 <div class="bg-glow"></div>
-<div class="flash" id="flash"></div>
-
+<div id="flash" class="flash"></div>
 <canvas id="canvas"></canvas>
 
 <div class="container">
-
-  <div id="s1" class="text">A presence is felt...</div>
-  <div id="s2" class="text">Not seen... but known...</div>
-
-  <div id="s3" class="text breathe">Something powerful is arriving...</div>
-
-  <div id="s4" class="text">And in this moment...</div>
-
-  <div id="s5" class="text">Everything changes...</div>
-
+  <div id="s1" class="text"><p>A presence is felt...</p></div>
+  <div id="s2" class="text"><p>Not seen... but known...</p></div>
+  <div id="s3" class="text"><p>Something powerful is arriving...</p></div>
+  <div id="s4" class="text"><p>The moment is near...</p></div>
+  <div id="s5" class="text"><p>Hold your breath...</p></div>
   <div id="s6" class="text name">GATIK</div>
-
 </div>
 
 <script>
-// SCENE FLOW WITH SILENCE GAP
+// Scenes
 const scenes = ["s1","s2","s3","s4","s5"];
-let i=0;
+let i = 0;
 
 function nextScene(){
   if(i>0) document.getElementById(scenes[i-1]).classList.remove("show");
 
-  if(i<scenes.length){
+  if(i < scenes.length){
     document.getElementById(scenes[i]).classList.add("show");
     i++;
-    setTimeout(nextScene, 1800);
+    setTimeout(nextScene, 1600);
   } else {
-    // SILENCE BEFORE REVEAL
-    setTimeout(reveal, 1500);
+    setTimeout(reveal, 1200);
   }
 }
 
-// REVEAL MOMENT
+// Reveal
 function reveal(){
+  document.getElementById("flash").style.opacity = 1;
+  setTimeout(()=> document.getElementById("flash").style.opacity = 0, 300);
 
-  // flash
-  const flash = document.getElementById("flash");
-  flash.style.opacity = 1;
-  setTimeout(()=> flash.style.opacity = 0, 300);
-
-  // particle collapse → form
   collapseParticles();
-
-  // show name
   document.getElementById("s6").classList.add("show");
-
-  playBell();
 }
 
-// TEMPLE BELL SYNTH
-function playBell(){
-  const ctx = new (window.AudioContext || window.webkitAudioContext)();
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-
-  osc.frequency.setValueAtTime(432, ctx.currentTime);
-  gain.gain.setValueAtTime(1, ctx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+3);
-
-  osc.connect(gain);
-  gain.connect(ctx.destination);
-
-  osc.start();
-  osc.stop(ctx.currentTime+3);
-}
-
-// PARTICLES
+// Canvas
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+function resize(){
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener("resize", resize);
 
 let particles = [];
 
-// INITIAL FLOATING ENERGY
-for(let i=0;i<150;i++){
+// Initial particles
+for(let i=0;i<120;i++){
   particles.push({
     x:Math.random()*canvas.width,
     y:Math.random()*canvas.height,
-    vx:(Math.random()-0.5)*0.5,
-    vy:(Math.random()-0.5)*0.5
+    vx:(Math.random()-0.5),
+    vy:(Math.random()-0.5)
   });
 }
 
-// COLLAPSE INTO NAME
+// Collapse into text
 function collapseParticles(){
   const off = document.createElement("canvas");
   const offCtx = off.getContext("2d");
@@ -195,18 +171,18 @@ function collapseParticles(){
   off.width = canvas.width;
   off.height = canvas.height;
 
-  offCtx.fillStyle="white";
-  offCtx.font="bold 90px Cinzel";
-  offCtx.textAlign="center";
+  offCtx.fillStyle = "white";
+  offCtx.font = "bold 60px Cinzel";
+  offCtx.textAlign = "center";
   offCtx.fillText("GATIK", off.width/2, off.height/2);
 
   const data = offCtx.getImageData(0,0,off.width,off.height).data;
 
-  let targets=[];
+  let targets = [];
 
   for(let y=0;y<off.height;y+=6){
     for(let x=0;x<off.width;x+=6){
-      if(data[(y*off.width+x)*4]>128){
+      if(data[(y*off.width+x)*4] > 128){
         targets.push({x,y});
       }
     }
@@ -220,14 +196,14 @@ function collapseParticles(){
   }));
 }
 
-// ANIMATION LOOP
+// Animate
 function animate(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
   particles.forEach(p=>{
     if(p.tx){
-      p.x += (p.tx - p.x)*0.07;
-      p.y += (p.ty - p.y)*0.07;
+      p.x += (p.tx - p.x)*0.08;
+      p.y += (p.ty - p.y)*0.08;
     } else {
       p.x += p.vx;
       p.y += p.vy;
@@ -243,7 +219,7 @@ function animate(){
 }
 
 animate();
-setTimeout(nextScene,1000);
+setTimeout(nextScene, 1000);
 </script>
 
 </body>
