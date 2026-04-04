@@ -1,7 +1,250 @@
-<!-- Name + Meaning Wrapper -->
-<div id="nameBlock" class="text">
-  <div id="s6" class="name"></div>
-  <div id="meaning" class="meaning">
-    A person who moves forward with speed and purpose
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Baby Reveal</title>
+
+<style>
+body {
+  margin: 0;
+  background: radial-gradient(circle, #1a1200, #000);
+  font-family: Arial, sans-serif;
+  color: white;
+  overflow: hidden;
+}
+
+.container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+/* Scenes */
+.text {
+  position: absolute;
+  width: 90%;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 1.2s ease;
+}
+
+.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.text p {
+  font-size: clamp(18px, 5vw, 24px);
+}
+
+/* Name block */
+#nameBlock {
+  position: absolute;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+}
+
+#nameBlock.show {
+  opacity: 1;
+}
+
+.name {
+  font-size: clamp(40px, 10vw, 60px);
+  color: gold;
+  letter-spacing: 10px;
+}
+
+/* Letters */
+.letter {
+  display: inline-block;
+  opacity: 0;
+  transform: scale(0.5) translateY(20px);
+  transition: all 0.5s ease;
+}
+
+.letter.show {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  text-shadow: 0 0 20px gold;
+}
+
+/* Meaning */
+.meaning {
+  margin-top: 12px;
+  font-size: clamp(16px, 4vw, 20px);
+  color: #ddd;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 1.5s ease;
+}
+
+.meaning.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Flash */
+.flash {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: white;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+/* Canvas */
+canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+</style>
+</head>
+
+<body>
+
+<div id="flash" class="flash"></div>
+<canvas id="canvas"></canvas>
+
+<div class="container">
+
+  <div id="s1" class="text show">
+    <p>In a world that never pauses…<br>something extraordinary did.</p>
   </div>
+
+  <div id="s2" class="text">
+    <p>Not loud…<br>not sudden…<br>but powerful.</p>
+  </div>
+
+  <div id="s3" class="text">
+    <p>A presence.<br>A purpose.<br>A beginning.</p>
+  </div>
+
+  <div id="s4" class="text">
+    <p>He is not just born…<br>he is meant to be.</p>
+  </div>
+
+  <div id="s5" class="text">
+    <p>✨ Presenting…</p>
+  </div>
+
+  <!-- Name + Meaning -->
+  <div id="nameBlock">
+    <div id="name" class="name"></div>
+    <div id="meaning" class="meaning">
+      A person who moves forward with speed and purpose
+    </div>
+  </div>
+
 </div>
+
+<script>
+// Scene flow
+const scenes = ["s1","s2","s3","s4","s5"];
+let i = 0;
+
+function nextScene() {
+  document.getElementById(scenes[i]).classList.remove("show");
+  i++;
+
+  if (i < scenes.length) {
+    document.getElementById(scenes[i]).classList.add("show");
+    let delay = (i === 4) ? 2200 : 1600;
+    setTimeout(nextScene, delay);
+  } else {
+    setTimeout(reveal, 1800);
+  }
+}
+
+function reveal() {
+  const flash = document.getElementById("flash");
+  flash.style.opacity = 1;
+
+  setTimeout(() => {
+    flash.style.opacity = 0;
+    showNameLetters();
+  }, 300);
+}
+
+// Canvas setup
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+function resize(){
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener("resize", resize);
+
+// Background celebration
+let particles = [];
+for (let i = 0; i < 120; i++) {
+  particles.push({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    vy: Math.random() * 1 + 0.5,
+    size: Math.random() * 2 + 1
+  });
+}
+
+function animateParticles() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  particles.forEach(p => {
+    p.y += p.vy;
+
+    if (p.y > canvas.height) {
+      p.y = 0;
+      p.x = Math.random() * canvas.width;
+    }
+
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fillStyle = "gold";
+    ctx.fill();
+  });
+
+  requestAnimationFrame(animateParticles);
+}
+animateParticles();
+
+// Letter reveal
+function showNameLetters() {
+  const name = "GATIK";
+  const container = document.getElementById("name");
+  const block = document.getElementById("nameBlock");
+
+  block.classList.add("show");
+
+  name.split("").forEach((char, index) => {
+    const span = document.createElement("span");
+    span.textContent = char;
+    span.classList.add("letter");
+    container.appendChild(span);
+
+    setTimeout(() => {
+      span.classList.add("show");
+
+      // After full name → show meaning after 5 seconds
+      if (index === name.length - 1) {
+        setTimeout(() => {
+          document.getElementById("meaning").classList.add("show");
+        }, 5000);
+      }
+
+    }, index * 700);
+  });
+}
+
+// Start
+setTimeout(nextScene, 1200);
+</script>
+
+</body>
+</html>
