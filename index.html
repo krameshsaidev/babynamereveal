@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Baby Reveal</title>
+<title>Cinematic Reveal</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap" rel="stylesheet">
 
@@ -18,111 +18,134 @@ body {
   color: white;
 }
 
-/* Mobile-safe container */
-.container {
-  position: relative;
-  width: 100%;
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-/* Text block */
-.text {
+/* CAMERA LAYER */
+.camera {
   position: absolute;
-  width: 90%;
-  text-align: center;
-  opacity: 0;
-  transform: scale(0.95);
-  transition: all 1.2s ease;
-  padding: 0 10px;
-}
-
-/* Responsive font */
-.text p {
-  font-size: clamp(1.2rem, 5vw, 1.8rem);
-  letter-spacing: 2px;
-  line-height: 1.4;
-}
-
-.show {
-  opacity: 1;
+  width: 100%;
+  height: 100%;
   transform: scale(1);
+  animation: slowZoom 20s ease-in-out forwards;
 }
 
-/* Name styling */
-.name {
-  font-size: clamp(2rem, 10vw, 3.5rem);
-  color: gold;
-  letter-spacing: 6px;
-  text-shadow:
-    0 0 10px gold,
-    0 0 40px rgba(255,215,0,0.7);
+@keyframes slowZoom {
+  from { transform: scale(1); }
+  to { transform: scale(1.08); }
 }
 
-/* Background glow */
-.bg-glow {
+/* PARALLAX BACKGROUND */
+.bg {
   position: absolute;
   width: 200%;
   height: 200%;
   background: radial-gradient(circle, rgba(255,215,0,0.1), transparent);
-  animation: float 12s linear infinite;
-  z-index: 0;
+  animation: drift 25s linear infinite;
 }
 
-@keyframes float {
+@keyframes drift {
   from { transform: translate(-10%, -10%); }
   to { transform: translate(10%, 10%); }
 }
 
-/* Canvas */
-canvas {
-  position: absolute;
+/* Container */
+.container {
+  position: relative;
   width: 100%;
-  height: 100%;
-  z-index: 1;
+  height: 100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
 }
 
-/* Text above canvas */
-.text { z-index: 2; }
+/* Text */
+.text {
+  position:absolute;
+  width:90%;
+  opacity:0;
+  transform: translateY(20px) scale(0.96);
+  transition: all 1.2s ease;
+}
+
+.show {
+  opacity:1;
+  transform: translateY(0) scale(1);
+}
+
+.text p {
+  font-size: clamp(1.2rem, 5vw, 1.8rem);
+  letter-spacing:2px;
+}
+
+/* Name */
+.name {
+  font-size: clamp(2.5rem, 10vw, 3.8rem);
+  color: gold;
+  letter-spacing:8px;
+  text-shadow:
+    0 0 20px gold,
+    0 0 60px rgba(255,215,0,0.7);
+}
+
+/* Reveal impact zoom */
+.impact {
+  animation: impactZoom 0.8s ease;
+}
+
+@keyframes impactZoom {
+  0% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+/* Canvas */
+canvas {
+  position:absolute;
+  width:100%;
+  height:100%;
+}
 
 /* Flash */
 .flash {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(circle, rgba(255,215,0,0.7), transparent);
-  opacity: 0;
-  z-index: 3;
+  position:absolute;
+  width:100%;
+  height:100%;
+  background: radial-gradient(circle, rgba(255,215,0,0.8), transparent);
+  opacity:0;
 }
 </style>
 </head>
 
 <body>
 
-<div class="bg-glow"></div>
-<div id="flash" class="flash"></div>
-<canvas id="canvas"></canvas>
+<div class="camera">
 
-<div class="container">
-  <div id="s1" class="text"><p>A presence is felt...</p></div>
-  <div id="s2" class="text"><p>Not seen... but known...</p></div>
-  <div id="s3" class="text"><p>Something powerful is arriving...</p></div>
-  <div id="s4" class="text"><p>The moment is near...</p></div>
-  <div id="s5" class="text"><p>Hold your breath...</p></div>
-  <div id="s6" class="text name">GATIK</div>
+  <div class="bg"></div>
+  <div id="flash" class="flash"></div>
+
+  <canvas id="canvas"></canvas>
+
+  <div class="container">
+
+    <div id="s1" class="text"><p>A presence is felt...</p></div>
+    <div id="s2" class="text"><p>Not seen... but known...</p></div>
+    <div id="s3" class="text"><p>Something powerful is arriving...</p></div>
+    <div id="s4" class="text"><p>The moment is near...</p></div>
+    <div id="s5" class="text"><p>Hold your breath...</p></div>
+
+    <div id="s6" class="text name">GATIK</div>
+
+  </div>
+
 </div>
 
 <script>
-// Scenes
+// SCENES
 const scenes = ["s1","s2","s3","s4","s5"];
-let i = 0;
+let i=0;
 
 function nextScene(){
   if(i>0) document.getElementById(scenes[i-1]).classList.remove("show");
 
-  if(i < scenes.length){
+  if(i<scenes.length){
     document.getElementById(scenes[i]).classList.add("show");
     i++;
     setTimeout(nextScene, 1600);
@@ -131,16 +154,20 @@ function nextScene(){
   }
 }
 
-// Reveal
+// REVEAL
 function reveal(){
-  document.getElementById("flash").style.opacity = 1;
-  setTimeout(()=> document.getElementById("flash").style.opacity = 0, 300);
+  const flash = document.getElementById("flash");
+  flash.style.opacity = 1;
+  setTimeout(()=> flash.style.opacity = 0, 300);
 
   collapseParticles();
-  document.getElementById("s6").classList.add("show");
+
+  const name = document.getElementById("s6");
+  name.classList.add("show");
+  name.classList.add("impact");
 }
 
-// Canvas
+// CANVAS
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
@@ -153,13 +180,13 @@ window.addEventListener("resize", resize);
 
 let particles = [];
 
-// Initial particles
-for(let i=0;i<120;i++){
+// Ambient particles
+for(let i=0;i<140;i++){
   particles.push({
     x:Math.random()*canvas.width,
     y:Math.random()*canvas.height,
-    vx:(Math.random()-0.5),
-    vy:(Math.random()-0.5)
+    vx:(Math.random()-0.5)*0.4,
+    vy:(Math.random()-0.5)*0.4
   });
 }
 
@@ -178,11 +205,11 @@ function collapseParticles(){
 
   const data = offCtx.getImageData(0,0,off.width,off.height).data;
 
-  let targets = [];
+  let targets=[];
 
   for(let y=0;y<off.height;y+=6){
     for(let x=0;x<off.width;x+=6){
-      if(data[(y*off.width+x)*4] > 128){
+      if(data[(y*off.width+x)*4]>128){
         targets.push({x,y});
       }
     }
@@ -202,8 +229,8 @@ function animate(){
 
   particles.forEach(p=>{
     if(p.tx){
-      p.x += (p.tx - p.x)*0.08;
-      p.y += (p.ty - p.y)*0.08;
+      p.x += (p.tx - p.x)*0.07;
+      p.y += (p.ty - p.y)*0.07;
     } else {
       p.x += p.vx;
       p.y += p.vy;
