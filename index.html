@@ -20,6 +20,7 @@ body {
   justify-content: center;
   align-items: center;
   text-align: center;
+  flex-direction: column;
 }
 
 /* Text */
@@ -59,6 +60,19 @@ body {
   opacity: 1;
   transform: scale(1) translateY(0);
   text-shadow: 0 0 20px gold;
+}
+
+/* Meaning */
+.meaning {
+  margin-top: 15px;
+  font-size: clamp(16px, 4vw, 20px);
+  color: #ddd;
+  opacity: 0;
+  transition: opacity 1.5s ease;
+}
+
+.meaning.show {
+  opacity: 1;
 }
 
 /* Flash */
@@ -107,7 +121,13 @@ canvas {
     <p>✨ Presenting…</p>
   </div>
 
+  <!-- Name -->
   <div id="s6" class="text name"></div>
+
+  <!-- Meaning -->
+  <div id="meaning" class="meaning">
+    A person who moves forward with speed and purpose
+  </div>
 
 </div>
 
@@ -151,7 +171,7 @@ window.addEventListener("resize", resize);
 
 let particles = [];
 
-// Continuous background confetti
+// Background confetti
 for (let i = 0; i < 120; i++) {
   particles.push({
     x: Math.random() * canvas.width,
@@ -198,25 +218,15 @@ function showNameLetters() {
     setTimeout(() => {
       span.classList.add("show");
 
-      // FINAL CELEBRATION BOOST on last letter
+      // After full name → show meaning
       if (index === name.length - 1) {
-        boostCelebration();
+        setTimeout(() => {
+          document.getElementById("meaning").classList.add("show");
+        }, 1000);
       }
 
     }, index * 700);
   });
-}
-
-// Boost effect
-function boostCelebration() {
-  for (let i = 0; i < 80; i++) {
-    particles.push({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      vy: Math.random() * 2 + 1,
-      size: Math.random() * 3 + 1
-    });
-  }
 }
 
 // Start
