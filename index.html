@@ -1,32 +1,178 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Our Little Miracle 💙</title>
-<link rel="stylesheet" href="style.css">
+<title>Our Little Miracle</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: black;
+  color: white;
+  overflow-x: hidden;
+}
+
+/* Sections */
+.section {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  text-align: center;
+  padding: 20px;
+}
+
+/* Star background */
+.stars {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(white 1px, transparent 1px);
+  background-size: 3px 3px;
+  opacity: 0.2;
+  animation: moveStars 60s linear infinite;
+}
+
+@keyframes moveStars {
+  from {transform: translateY(0);}
+  to {transform: translateY(-1000px);}
+}
+
+/* Fade animation */
+.fade {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: all 1.5s ease;
+}
+
+.fade.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Parents */
+.heart {
+  color: #ff4d6d;
+  font-size: 28px;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%,100% {transform: scale(1);}
+  50% {transform: scale(1.2);}
+}
+
+/* Reveal */
+.reveal {
+  font-size: 60px;
+  letter-spacing: 15px;
+  color: gold;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: 2s ease;
+}
+
+.reveal.show {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Glow */
+.glow {
+  text-shadow: 0 0 10px gold, 0 0 30px gold;
+}
+
+/* Suspense */
+.suspense {
+  font-size: 22px;
+  opacity: 0.7;
+}
+
+/* Small screens */
+@media(max-width:600px){
+  .reveal { font-size: 40px; letter-spacing: 8px; }
+}
+</style>
 </head>
+
 <body>
-<div class="container">
-    <div class="scene active" style="background-image:url('assets/bg1.jpg')">
-        <div class="overlay"><h1>Our little miracle...</h1></div>
-    </div>
-    <div class="scene" style="background-image:url('assets/bg2.jpg')">
-        <div class="overlay"><h1>A journey of love...</h1></div>
-    </div>
-    <div class="scene" style="background-image:url('assets/bg3.jpg')">
-        <div class="overlay"><h1>Tiny dreams, endless hope...</h1></div>
-    </div>
-    <div class="scene" style="background-image:url('assets/bg4.jpg')">
-        <div class="overlay"><h1>And now... we meet him...</h1></div>
-    </div>
-    <div class="scene reveal">
-        <div class="overlay">
-            <h2 class="flash">💙 It's a Boy 💙</h2>
-            <h1 class="name">GATIK</h1>
-        </div>
-    </div>
-</div>
-<audio id="music" src="assets/music.mp3"></audio>
-<script src="script.js"></script>
+
+<div class="stars"></div>
+
+<!-- Scene 1 -->
+<section class="section fade">
+  <h1>Some stories are written in the stars...</h1>
+</section>
+
+<!-- Scene 2 -->
+<section class="section fade">
+  <h2>
+    Ramesh Sai <span class="heart">❤</span> Sri Laya
+  </h2>
+</section>
+
+<!-- Scene 3 -->
+<section class="section fade">
+  <p>We waited...</p>
+  <p>We dreamed...</p>
+  <p>For this moment...</p>
+</section>
+
+<!-- Scene 4 -->
+<section class="section fade">
+  <p class="suspense">And then...</p>
+  <p class="suspense">Everything changed</p>
+</section>
+
+<!-- Scene 5 -->
+<section class="section">
+  <h1 id="name" class="reveal glow"></h1>
+</section>
+
+<script>
+const fades = document.querySelectorAll(".fade");
+const nameEl = document.getElementById("name");
+
+window.addEventListener("scroll", () => {
+  const triggerBottom = window.innerHeight * 0.85;
+
+  fades.forEach(section => {
+    const boxTop = section.getBoundingClientRect().top;
+
+    if (boxTop < triggerBottom) {
+      section.classList.add("show");
+    }
+  });
+
+  // Reveal trigger
+  if (window.scrollY > window.innerHeight * 3.5) {
+    revealName("GATIK");
+  }
+});
+
+let revealed = false;
+
+function revealName(text) {
+  if (revealed) return;
+  revealed = true;
+
+  nameEl.classList.add("show");
+
+  let i = 0;
+  function type() {
+    if (i < text.length) {
+      nameEl.innerHTML += text[i];
+      i++;
+      setTimeout(type, 180);
+    }
+  }
+
+  setTimeout(type, 500);
+}
+</script>
+
 </body>
 </html>
