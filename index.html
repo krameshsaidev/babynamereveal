@@ -3,20 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Divine Reveal</title>
+<title>Cinematic Reveal</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap" rel="stylesheet">
 
 <style>
 body {
   margin: 0;
-  background: radial-gradient(circle, #0a0a0f, #000);
+  background: radial-gradient(circle, #050507, #000);
   overflow: hidden;
-  color: white;
   font-family: 'Cinzel', serif;
+  color: white;
 }
 
-/* Center */
+/* Layout */
 .container {
   position: absolute;
   width: 100%;
@@ -24,38 +24,78 @@ body {
   display:flex;
   justify-content:center;
   align-items:center;
+  text-align:center;
 }
 
-/* Cinematic text */
+/* Text */
 .text {
   position:absolute;
   opacity:0;
-  transform:scale(0.85);
-  transition: all 1.5s ease;
-  text-align:center;
+  transform: scale(0.9);
+  transition: all 1.4s ease;
   letter-spacing:4px;
 }
 
 .show {
   opacity:1;
-  transform:scale(1);
+  transform: scale(1);
 }
 
-/* Trailer style */
-.title {
-  font-size: 2rem;
-  color:#ddd;
-  text-transform:uppercase;
+/* Suspense flicker */
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.flicker {
+  animation: flicker 1s infinite;
+}
+
+/* Glow breathing */
+@keyframes breathe {
+  0% { text-shadow: 0 0 10px gold; }
+  50% { text-shadow: 0 0 40px gold; }
+  100% { text-shadow: 0 0 10px gold; }
+}
+
+.breathe {
+  animation: breathe 2s infinite;
+}
+
+/* Veil */
+.veil {
+  position:absolute;
+  width:100%;
+  height:100%;
+  background: black;
+  z-index:5;
+  transition: transform 1.2s ease;
+}
+
+.reveal {
+  transform: scaleY(0);
+  transform-origin: center;
 }
 
 /* Name */
 .name {
   font-size: 3rem;
   color: gold;
+  letter-spacing: 8px;
+  transform: perspective(800px) rotateX(10deg);
   text-shadow:
     0 0 10px gold,
-    0 0 30px rgba(255,215,0,0.8),
-    0 0 60px rgba(255,215,0,0.5);
+    0 0 40px rgba(255,215,0,0.7);
+}
+
+/* Zoom effect */
+.zoom {
+  animation: zoomIn 3s ease forwards;
+}
+
+@keyframes zoomIn {
+  from { transform: scale(1); }
+  to { transform: scale(1.1); }
 }
 
 /* Canvas */
@@ -71,65 +111,59 @@ canvas {
 
 <canvas id="canvas"></canvas>
 
-<div class="container">
-  <div id="s1" class="text title">A Divine Blessing...</div>
-  <div id="s2" class="text title">A New Beginning...</div>
-  <div id="s3" class="text title">From the Universe...</div>
-  <div id="s4" class="text title">A Soul Arrives</div>
-  <div id="s5" class="text title">Presenting...</div>
+<div class="veil" id="veil"></div>
+
+<div class="container zoom">
+
+  <div id="s1" class="text">A Divine Blessing...</div>
+  <div id="s2" class="text">Something is coming...</div>
+
+  <div id="s3" class="text flicker">Can you feel it?</div>
+
+  <div id="s4" class="text breathe">The moment is near...</div>
+
+  <div id="s5" class="text breathe">Hold your breath...</div>
+
   <div id="s6" class="text name">GATIK</div>
+
 </div>
 
 <script>
-// FONT LOAD DELAY (cinematic feel)
-document.fonts.ready.then(() => {
-  setTimeout(startShow, 500);
-});
-
-// SCENES
+// Scene flow with suspense pause
 const scenes = ["s1","s2","s3","s4","s5","s6"];
 let i = 0;
 
-function startShow(){
-  nextScene();
-}
-
-function nextScene(){
+function nextScene() {
   if(i>0) document.getElementById(scenes[i-1]).classList.remove("show");
 
   if(i<scenes.length){
     document.getElementById(scenes[i]).classList.add("show");
 
-    if(i===5){
-      playBell();
-      particleText();
+    // SUSPENSE PAUSE before name
+    if(i === 5){
+      setTimeout(() => {
+        revealName();
+      }, 1800);
+      return;
     }
 
     i++;
-    setTimeout(nextScene, i===5 ? 2500 : 1800);
+    setTimeout(nextScene, 1600);
   }
 }
 
-// TEMPLE BELL SOUND (no file)
-function playBell(){
-  const ctx = new (window.AudioContext || window.webkitAudioContext)();
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
+function revealName(){
+  // Break veil
+  document.getElementById("veil").classList.add("reveal");
 
-  osc.type = "sine";
-  osc.frequency.setValueAtTime(432, ctx.currentTime);
+  // Particle formation
+  particleText();
 
-  gain.gain.setValueAtTime(1, ctx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 3);
-
-  osc.connect(gain);
-  gain.connect(ctx.destination);
-
-  osc.start();
-  osc.stop(ctx.currentTime + 3);
+  // Show name
+  document.getElementById("s6").classList.add("show");
 }
 
-// PARTICLE TEXT FORMATION
+// PARTICLE TEXT
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
@@ -154,16 +188,15 @@ function particleText(){
 
   particles = [];
 
-  for(let y=0; y<off.height; y+=6){
-    for(let x=0; x<off.width; x+=6){
-      const index = (y * off.width + x) * 4;
-      if(data[index] > 128){
+  for(let y=0;y<off.height;y+=6){
+    for(let x=0;x<off.width;x+=6){
+      const index = (y*off.width+x)*4;
+      if(data[index]>128){
         particles.push({
           x: Math.random()*canvas.width,
           y: Math.random()*canvas.height,
-          tx: x,
-          ty: y,
-          size:2
+          tx:x,
+          ty:y
         });
       }
     }
@@ -180,13 +213,16 @@ function animateParticles(){
     p.y += (p.ty - p.y)*0.08;
 
     ctx.beginPath();
-    ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+    ctx.arc(p.x,p.y,2,0,Math.PI*2);
     ctx.fillStyle="gold";
     ctx.fill();
   });
 
   requestAnimationFrame(animateParticles);
 }
+
+// Start
+setTimeout(nextScene, 1000);
 </script>
 
 </body>
