@@ -14,7 +14,6 @@ body {
   overflow: hidden;
 }
 
-/* Container */
 .container {
   height: 100vh;
   display: flex;
@@ -28,28 +27,37 @@ body {
   position: absolute;
   width: 90%;
   opacity: 0;
-  transition: opacity 1s ease;
+  transform: translateY(20px);
+  transition: all 1.2s ease;
 }
 
 .show {
   opacity: 1;
+  transform: translateY(0);
 }
 
-/* Responsive text */
 .text p {
-  font-size: 22px;
+  font-size: clamp(18px, 5vw, 24px);
+  line-height: 1.5;
 }
 
 /* Name */
 .name {
-  font-size: 42px;
+  font-size: clamp(40px, 10vw, 60px);
   color: gold;
-  letter-spacing: 5px;
+  letter-spacing: 6px;
+  text-shadow: 0 0 20px gold;
 }
 
-/* Glow */
+/* Glow pulse */
+@keyframes glow {
+  0% { text-shadow: 0 0 10px gold; }
+  50% { text-shadow: 0 0 40px gold; }
+  100% { text-shadow: 0 0 10px gold; }
+}
+
 .glow {
-  text-shadow: 0 0 20px gold;
+  animation: glow 2s infinite;
 }
 
 /* Flash */
@@ -69,15 +77,41 @@ body {
 <div id="flash" class="flash"></div>
 
 <div class="container">
-  <div id="s1" class="text show"><p>A new journey begins...</p></div>
-  <div id="s2" class="text"><p>Something beautiful is coming...</p></div>
-  <div id="s3" class="text"><p>Our hearts are ready...</p></div>
-  <div id="s4" class="text"><p>Hold your breath...</p></div>
-  <div id="s5" class="text name glow">GATIK</div>
+
+  <!-- Beat 1 -->
+  <div id="s1" class="text show">
+    <p>In a world that never pauses…<br>something extraordinary did.</p>
+  </div>
+
+  <!-- Beat 2 -->
+  <div id="s2" class="text">
+    <p>Not loud…<br>not sudden…<br>but powerful.</p>
+  </div>
+
+  <!-- Beat 3 -->
+  <div id="s3" class="text">
+    <p>A presence.<br>A purpose.<br>A beginning.</p>
+  </div>
+
+  <!-- Beat 4 -->
+  <div id="s4" class="text">
+    <p>He is not just born…<br>he is meant to be.</p>
+  </div>
+
+  <!-- Beat 5 -->
+  <div id="s5" class="text glow">
+    <p>✨ Presenting…</p>
+  </div>
+
+  <!-- Final Reveal -->
+  <div id="s6" class="text name">
+    GATIK
+  </div>
+
 </div>
 
 <script>
-const scenes = ["s1","s2","s3","s4"];
+const scenes = ["s1","s2","s3","s4","s5"];
 let i = 0;
 
 function nextScene() {
@@ -86,9 +120,14 @@ function nextScene() {
 
   if (i < scenes.length) {
     document.getElementById(scenes[i]).classList.add("show");
-    setTimeout(nextScene, 1500);
+
+    // Slightly longer pause near climax
+    let delay = (i === 4) ? 2000 : 1600;
+
+    setTimeout(nextScene, delay);
   } else {
-    setTimeout(reveal, 1200);
+    // Suspense pause before name
+    setTimeout(reveal, 1400);
   }
 }
 
@@ -98,11 +137,11 @@ function reveal() {
 
   setTimeout(() => {
     flash.style.opacity = 0;
-    document.getElementById("s5").classList.add("show");
+    document.getElementById("s6").classList.add("show");
   }, 300);
 }
 
-// Start after short delay
+// Start
 setTimeout(nextScene, 1200);
 </script>
 
