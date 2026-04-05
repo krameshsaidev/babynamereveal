@@ -40,6 +40,23 @@ body {
   font-size: clamp(18px, 5vw, 24px);
 }
 
+/* PHOTO */
+.photo {
+  position: absolute;
+  width: 70%;
+  max-width: 300px;
+  border-radius: 20px;
+  opacity: 0;
+  transform: scale(0.9);
+  transition: all 2s ease;
+  box-shadow: 0 0 40px rgba(255,215,0,0.4);
+}
+
+.photo.show {
+  opacity: 1;
+  transform: scale(1.05);
+}
+
 /* Name block */
 #nameBlock {
   position: absolute;
@@ -78,13 +95,11 @@ body {
   font-size: clamp(16px, 4vw, 20px);
   color: #ddd;
   opacity: 0;
-  transform: translateY(15px);
-  transition: all 2.5s ease;
+  transition: opacity 2s ease;
 }
 
 .meaning.show {
   opacity: 1;
-  transform: translateY(0);
 }
 
 /* Flash */
@@ -129,11 +144,14 @@ canvas {
     <p>He is not just born…<br>he is meant to be.</p>
   </div>
 
+  <!-- PHOTO -->
+  <img id="photo" class="photo" src="baby.jpg" />
+
   <div id="s5" class="text">
     <p>✨ Presenting…</p>
   </div>
 
-  <!-- Name + Meaning -->
+  <!-- Name -->
   <div id="nameBlock">
     <div id="name" class="name"></div>
     <div id="meaning" class="meaning">
@@ -144,8 +162,7 @@ canvas {
 </div>
 
 <script>
-// Scene flow (ULTRA SLOW but controlled)
-const scenes = ["s1","s2","s3","s4","s5"];
+const scenes = ["s1","s2","s3","s4"];
 let i = 0;
 
 function nextScene() {
@@ -154,15 +171,33 @@ function nextScene() {
 
   if (i < scenes.length) {
     document.getElementById(scenes[i]).classList.add("show");
-
-    let delay = (i === 4) ? 4000 : 3000;
-    setTimeout(nextScene, delay);
-
+    setTimeout(nextScene, 3000);
   } else {
-    setTimeout(reveal, 4000); // long suspense
+    showPhoto();
   }
 }
 
+// PHOTO FLOW
+function showPhoto() {
+  const photo = document.getElementById("photo");
+  photo.classList.add("show");
+
+  setTimeout(() => {
+    photo.classList.remove("show");
+
+    setTimeout(() => {
+      document.getElementById("s5").classList.add("show");
+
+      setTimeout(() => {
+        reveal();
+      }, 2500);
+
+    }, 1500);
+
+  }, 3500);
+}
+
+// REVEAL
 function reveal() {
   const flash = document.getElementById("flash");
   flash.style.opacity = 1;
@@ -173,78 +208,7 @@ function reveal() {
   }, 600);
 }
 
-// Canvas setup
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
-
-function resize(){
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-}
-resize();
-window.addEventListener("resize", resize);
-
-// Background particles (slower movement)
-let particles = [];
-for (let i = 0; i < 120; i++) {
-  particles.push({
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height,
-    vy: Math.random() * 0.5 + 0.2,
-    size: Math.random() * 2 + 1
-  });
-}
-
-// Grand celebration
-function grandCelebration() {
-  for (let i = 0; i < 200; i++) {
-    particles.push({
-      x: canvas.width / 2,
-      y: canvas.height / 2,
-      vx: (Math.random() - 0.5) * 7,
-      vy: (Math.random() - 0.5) * 7,
-      size: Math.random() * 3 + 1,
-      life: 120
-    });
-  }
-}
-
-// Animate particles
-function animateParticles() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  particles.forEach((p, index) => {
-
-    if (p.life) {
-      p.x += p.vx;
-      p.y += p.vy;
-      p.life--;
-
-      if (p.life <= 0) {
-        particles.splice(index, 1);
-        return;
-      }
-
-    } else {
-      p.y += p.vy;
-
-      if (p.y > canvas.height) {
-        p.y = 0;
-        p.x = Math.random() * canvas.width;
-      }
-    }
-
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.size || 2, 0, Math.PI * 2);
-    ctx.fillStyle = "gold";
-    ctx.fill();
-  });
-
-  requestAnimationFrame(animateParticles);
-}
-animateParticles();
-
-// Letter reveal (SLOW + DRAMATIC)
+// LETTERS
 function showNameLetters() {
   const name = "GATIK";
   const container = document.getElementById("name");
@@ -262,23 +226,15 @@ function showNameLetters() {
       span.classList.add("show");
 
       if (index === name.length - 1) {
-
-        // Celebration after pause
-        setTimeout(() => {
-          grandCelebration();
-        }, 4000);
-
-        // Meaning after 5 seconds
         setTimeout(() => {
           document.getElementById("meaning").classList.add("show");
-        }, 6000);
+        }, 5000);
       }
 
-    }, index * 1400); // very slow letters
+    }, index * 1200);
   });
 }
 
-// Start
 setTimeout(nextScene, 2000);
 </script>
 
