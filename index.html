@@ -28,7 +28,7 @@ body {
   width: 90%;
   opacity: 0;
   transform: translateY(20px);
-  transition: all 1.2s ease;
+  transition: all 1.5s ease;
 }
 
 .show {
@@ -45,7 +45,7 @@ body {
   position: absolute;
   text-align: center;
   opacity: 0;
-  transition: opacity 1.2s ease;
+  transition: opacity 1.5s ease;
 }
 
 #nameBlock.show {
@@ -63,7 +63,7 @@ body {
   display: inline-block;
   opacity: 0;
   transform: scale(0.5) translateY(20px);
-  transition: all 0.5s ease;
+  transition: all 0.6s ease;
 }
 
 .letter.show {
@@ -79,7 +79,7 @@ body {
   color: #ddd;
   opacity: 0;
   transform: translateY(10px);
-  transition: all 1.5s ease;
+  transition: all 2s ease;
 }
 
 .meaning.show {
@@ -94,7 +94,7 @@ body {
   height: 100%;
   background: white;
   opacity: 0;
-  transition: opacity 0.3s;
+  transition: opacity 0.4s;
 }
 
 /* Canvas */
@@ -144,7 +144,7 @@ canvas {
 </div>
 
 <script>
-// Scene flow
+// Scene flow (SLOW + CINEMATIC)
 const scenes = ["s1","s2","s3","s4","s5"];
 let i = 0;
 
@@ -154,10 +154,12 @@ function nextScene() {
 
   if (i < scenes.length) {
     document.getElementById(scenes[i]).classList.add("show");
-    let delay = (i === 4) ? 2200 : 1600;
+
+    let delay = (i === 4) ? 3000 : 2200; // slower pacing
     setTimeout(nextScene, delay);
+
   } else {
-    setTimeout(reveal, 1800);
+    setTimeout(reveal, 3000); // suspense pause
   }
 }
 
@@ -168,7 +170,7 @@ function reveal() {
   setTimeout(() => {
     flash.style.opacity = 0;
     showNameLetters();
-  }, 300);
+  }, 400);
 }
 
 // Canvas setup
@@ -188,21 +190,21 @@ for (let i = 0; i < 120; i++) {
   particles.push({
     x: Math.random() * canvas.width,
     y: Math.random() * canvas.height,
-    vy: Math.random() * 1 + 0.5,
+    vy: Math.random() * 0.8 + 0.3,
     size: Math.random() * 2 + 1
   });
 }
 
 // Grand celebration
 function grandCelebration() {
-  for (let i = 0; i < 150; i++) {
+  for (let i = 0; i < 180; i++) {
     particles.push({
       x: canvas.width / 2,
       y: canvas.height / 2,
       vx: (Math.random() - 0.5) * 8,
       vy: (Math.random() - 0.5) * 8,
       size: Math.random() * 3 + 1,
-      life: 80
+      life: 90
     });
   }
 }
@@ -242,7 +244,7 @@ function animateParticles() {
 }
 animateParticles();
 
-// Letter reveal
+// Letter reveal (SLOW + IMPACTFUL)
 function showNameLetters() {
   const name = "GATIK";
   const container = document.getElementById("name");
@@ -264,7 +266,7 @@ function showNameLetters() {
         // Celebration after pause
         setTimeout(() => {
           grandCelebration();
-        }, 2000);
+        }, 3000);
 
         // Meaning after 5 seconds
         setTimeout(() => {
@@ -272,12 +274,12 @@ function showNameLetters() {
         }, 5000);
       }
 
-    }, index * 700);
+    }, index * 1000); // slower letters
   });
 }
 
 // Start
-setTimeout(nextScene, 1200);
+setTimeout(nextScene, 1500);
 </script>
 
 </body>
